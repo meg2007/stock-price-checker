@@ -4,11 +4,25 @@ const express     = require('express');
 const bodyParser  = require('body-parser');
 const cors        = require('cors');
 
+const helmet = require('helmet');
+const crypto = require('crypto');
+
 const apiRoutes         = require('./routes/api.js');
 const fccTestingRoutes  = require('./routes/fcctesting.js');
 const runner            = require('./test-runner');
 
 const app = express();
+
+app.use(helmet());
+
+app.use((req, res, next) => {
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self';");
+  next();
+});
+
+function anonymizeIP(ip) {
+  return crypto.createHash('sha256').update(ip).digest('hex').substring(0, 20);
+}
 
 app.use('/public', express.static(process.cwd() + '/public'));
 
